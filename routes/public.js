@@ -1,11 +1,12 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()
+const router = express.Router() // Utilizar as rotas
 
-// Utilizar as rotas
-const router = express.Router()
+const JWT_SECRET = process.env.JWT_SECRET
 
 // Usamos o async pra permitir o uso do await
 // -> req = request, -> res = response
@@ -46,20 +47,35 @@ router.post('/login', async (req, res) => {
     try{
         const userInfo = req.body; // armazenando em userInfo os dados da requisição
 
-        // Verificando se o user existe
-        // findUnique -> busca um user 
-        // where: {email: userInfo.email} -> Busca pelo email que seja igual ao do userInfo.email
+        // Busca o user do banco de dados com uma busca pelo email que será verificada
         const user = await prisma.user.findUnique({
             where: {email: userInfo.email} 
         })
 
+        // Verificando se o user existe
+        // findUnique -> busca um user 
+        // where: {email: userInfo.email} -> Busca pelo email que seja igual ao do userInfo.email
         // Se não achar
         if(!user) {
             return res.status(404).json({ message: 'Usuário não encontrado!' })
         }
 
-        // Se achar
-        res.status(200).json(user)
+        // Comparando a senha enviada pra fazer login (userInfo.password) e a senha vinda do banco (user.password)
+        const isMatch = await bcrypt.compare(userInfo.password, user.password)
+
+        if(!isMatch){
+            return res.status(400).json({ message: 'Senha Invalida' })
+        }
+
+        // Gerar o Token JWT
+        const token = jwt.sign({ id: user.id}, JWT_SECRET, { expiresIn: '1m' })
+        // jwt.sign espera 3 coisas
+            // - um dado do user, no caso foi id
+            // - O JWT_SECRET
+            // Options -> nesete caso foi o tempo que expira o token
+
+        // Se achar -> envia uma resposta com status 200 (deu certo) e com o token em formato json
+        res.status(200).json(token)
 
     } catch (err){
         res.status(500).json({ message: 'Erro no servidor, Tente novamente' })
