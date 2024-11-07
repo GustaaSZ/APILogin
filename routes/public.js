@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Gerar o Token JWT
-        const token = jwt.sign({ id: user.id}, JWT_SECRET, { expiresIn: '1m' })
+        const token = jwt.sign({ id: user.id}, JWT_SECRET, { expiresIn: '7d' })
         // jwt.sign espera 3 coisas
             // - um dado do user, no caso foi id
             // - O JWT_SECRET
