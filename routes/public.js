@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
         })
 
         // Verificando se o user existe
-        // findUnique -> busca um user 
+        // findUnique -> busca por um user 
         // where: {email: userInfo.email} -> Busca pelo email que seja igual ao do userInfo.email
         // Se não achar
         if(!user) {
@@ -72,7 +72,7 @@ router.post('/login', async (req, res) => {
         // jwt.sign espera 3 coisas
             // - um dado do user, no caso foi id
             // - O JWT_SECRET
-            // Options -> nesete caso foi o tempo que expira o token
+            // Options -> neste caso foi o tempo que expira o token = 1m
 
         // Se achar -> envia uma resposta com status 200 (deu certo) e com o token em formato json
         res.status(200).json(token)
